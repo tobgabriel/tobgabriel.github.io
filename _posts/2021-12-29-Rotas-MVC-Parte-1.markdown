@@ -5,21 +5,90 @@ date:   2021-12-29 11:07:38 -0300
 categories: php mvc
 tag: php mvc rotas
 ---
-Este projeto tem como objetivo reproduzir um sistema de rotas para um futuro framework MVC.O projeto é baseado nos artigos do blog do [alxbbarbosa](https://github.com/alxbbarbosa 'alexbbarbosa'). Tentei refatora-lo da forma mais inteligível a mim.
-
-## Sumário
-___
-* [Por que utilizar um sistema de Rotas?](#Por-que-utilizar-um-sistema-de-rotas?)
-	* [URLs Amigáveis](###URLs-Amigáveis)
-* [A classe RouteCollection](##A-classe-RouteCollection)
-	* [Utilitários: parseUri](###Utilitários:-parseUri)
-	* [Utilitários: definePattern](###Utilitários:-definePattern)
+<p align="justify">
+Este projeto tem como objetivo reproduzir um sistema de rotas para um framework MVC.O projeto é baseado nos artigos do blog do <a href="https://github.com/alxbbarbosa">alxbbarbosa</a>. Tentei refatora-lo da forma mais inteligível a mim.
+</p>
 
 ## Por que utilizar um sistema de Rotas?
 ___
 ### O protocolo HTTP
+<p align="justify">
+Conforme o <a href="https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Overview">MDN Web Docs</a> o protocolo HTTP é um protocolo de aplicação cliente-servidor que permite a obetenção de recursos,como documentos HTML.
+Os <b>clientes</b>, geralmente navegadores web, se comunicam com os <b>servidores</b> através de mensagens individuais. O cliente envia uma <b>request</b> ao servidor que gera uma <b>response</b>.
+Um documento pode ser reconstruído a partir de diversos outros sub-documentos como textos,imagens,vídeos e demais.
+</p>
+<div align="center" style="padding:2pt; margin-bottom:2pt;">
+<img src="/assets/rotasmvc/http01.png"><legend>Créditos:MDN Web Docs.</legend>
+</div>
+
+
+<p align="justify">
+O fluxo de comunicação do protocolo HTTP parte de uma conexão TCP que será utilizada para enviar requisições e receber respostas.O cliente pode abrir uma nova conexão, reusar uma conexão existente, ou abrir várias conexões aos servidores.
+Depois, o cliente envia mensagens HTTP para o servidor e espera a resposta.
+</p>
+
+<div align="center" style="padding:2pt; margin-bottom:2pt;">
+<img src="/assets/rotasmvc/http02.png"><legend>Créditos:MDN Web Docs.</legend>
+</div>
+<div align="center" style="padding:2pt; margin-bottom:2pt;">
+<img src="/assets/rotasmvc/http03.png"><legend>Créditos:MDN Web Docs.</legend>
+</div>
+
+<p align="justify">
+As requisições HTTP contém os seguintes elementos:
+<ul>
+<li>Um método HTTP,geralmente um verbo GET,POST,DELETE,PUT e etc, ou um substantivo como OPTIONS ou HEAD. O método define qual operação o cliente deseja realizar.
+</li>
+<li>
+O caminho do recurso,geralmente representado por uma URL.
+</li>
+<li>
+Cabeçalhos opcionais que contém informações adicionais para os servidores.
+</li>
+<li>
+Ou um corpo de dados, para alguns métodos como POST, similares aos corpos das respostas, que contém o recurso requisitado.
+</li>
+</ul>
+</p>
+
+Respostas consistem dos seguintes elementos:
+
+* A versão do protocolo HTTP que elas seguem.
+* Um código de status, indicando se a requisição foi bem sucedida, ou não, e por quê.
+* Uma mensagem de status, uma pequena descrição informal sobre o código de status.
+* Cabeçalhos HTTP, como aqueles das requisições.
+* Opcionalmente, um corpo com dados do recurso requisitado.
+
+
+Conforme o <a href="https://pt.wikipedia.org/wiki/URL">Wikipedia</a> uma URL pode ser definida como
+
+
+>URL
+```
+esquema ou protocolo://domínio:porta/caminho/recurso?query_string#fragmento
+```
+>
+* O esquema é o protocolo. Poderá ser HTTP, HTTPS, FTP etc.
+* O domínio é o endereço da máquina: designa o servidor que disponibiliza o documento ou recurso solicitado.
+* A porta é o ponto lógico no qual se pode executar a conexão com o servidor. (opcional)
+* O caminho especifica o local (geralmente num sistema de arquivos) onde se encontra o recurso, dentro do servidor.
+* A query string é um conjunto de um ou mais pares "pergunta-resposta" ou "parâmetro-argumento" (como por exemplo nome=fulano, em que nome pode ser, por exemplo, uma variável, e fulano é o valor (argumento) atribuído a nome). É uma string enviada ao servidor para que seja possível filtrar ou mesmo criar o recurso. (opcional)
+* O fragmento é uma parte ou posição específica dentro do recurso. (opcional)
+
+Os vídeos do <a href="https://www.youtube.com/watch?v=V4XZ81vRGtM">Programador a Bordo</a> são bem didaticos para entender o protocolo HTTP,recomendo-os. Agora se você quer dar um passo atrás e busca entender redes de computadores te indico o canal do <a href="https://www.youtube.com/watch?v=dp9ynjJamoI&list=PLuf64C8sPVT_nObvAFU5W-SiE04ST-PlL">Paulo Kretcheu</a>.
+
 ### URLs Amigáveis
-<p sttyle='text-align: justify;'></p>
+
+
+<p align="justify">
+Desta forma podemos construir um redirecionador de url para facilitar o tratamento das requisições por parte do servidor.
+</p>
+
+## Visão Geral do sistema
+___
+<p align="justify">A função básica do Roteador é: ao receber uma requisição HTTP e direciona-la para o devido <i>Controller</i> baseado na url fornecida.</p>
+<p align="justify">Para isso o roteador utiliza um objeto <i>RouteCollection</i> para salvar e recuperar a coleção de rotas.
+Uma vez recuperada a rota, o <i>Dispatcher</i> interpreta a ação entregando o controle para o devido <i>Controller</i> ou executando a ação.</p>
 
 ## A classe RouteCollection
 ___
@@ -115,7 +184,7 @@ Utilizado para salvar as rotas.
 
 ### getRoute
 
-Utilizado para recuperar a rota e os parâmetros fornecidos pela uri do usuário.
+<p align="justify">Utilizado para recuperar a rota e os parâmetros fornecidos pela uri do usuário. Retorna um objeto a ser tratado pela classe <b>Router</b></p>
 
 1. Verifica se tem rotas cadastradas para o método;
 2. Compara cada rota salva do método com a uri informada pelo usuário e decide:
