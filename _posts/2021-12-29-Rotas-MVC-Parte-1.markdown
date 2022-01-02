@@ -1,12 +1,12 @@
 ---
 layout: post
-title:  "Rotas para Framework MVC - Parte 1"
+title:  "Rotas MVC - Parte 1"
 date:   2021-12-29 11:07:38 -0300
 categories: php mvc
 tag: php mvc rotas
 ---
 <p align="justify">
-Este projeto tem como objetivo reproduzir um sistema de rotas para um framework MVC.O projeto é baseado nos artigos do blog do <a href="https://github.com/alxbbarbosa">alxbbarbosa</a>. Tentei refatora-lo da forma mais inteligível a mim.
+Este projeto tem como objetivo reproduzir um sistema de rotas para um sitema MVC. Ele é baseado nos artigos do blog do <a href="https://github.com/alxbbarbosa">alxbbarbosa</a>. Tentei refatora-lo da forma mais inteligível a mim.
 </p>
 
 ## Por que utilizar um sistema de Rotas?
@@ -60,8 +60,13 @@ Respostas consistem dos seguintes elementos:
 * Opcionalmente, um corpo com dados do recurso requisitado.
 
 
+<p align="justify">
+Os vídeos do <a href="https://www.youtube.com/watch?v=V4XZ81vRGtM">Programador a Bordo</a> são bem didaticos para entender o protocolo HTTP recomendo-os.
+</p>
+### URLs Amigáveis
+<p align="justify">
 Conforme o <a href="https://pt.wikipedia.org/wiki/URL">Wikipedia</a> uma URL pode ser definida como
-
+</p>
 
 >URL
 ```
@@ -74,14 +79,31 @@ esquema ou protocolo://domínio:porta/caminho/recurso?query_string#fragmento
 * O caminho especifica o local (geralmente num sistema de arquivos) onde se encontra o recurso, dentro do servidor.
 * A query string é um conjunto de um ou mais pares "pergunta-resposta" ou "parâmetro-argumento" (como por exemplo nome=fulano, em que nome pode ser, por exemplo, uma variável, e fulano é o valor (argumento) atribuído a nome). É uma string enviada ao servidor para que seja possível filtrar ou mesmo criar o recurso. (opcional)
 * O fragmento é uma parte ou posição específica dentro do recurso. (opcional)
-
-Os vídeos do <a href="https://www.youtube.com/watch?v=V4XZ81vRGtM">Programador a Bordo</a> são bem didaticos para entender o protocolo HTTP,recomendo-os. Agora se você quer dar um passo atrás e busca entender redes de computadores te indico o canal do <a href="https://www.youtube.com/watch?v=dp9ynjJamoI&list=PLuf64C8sPVT_nObvAFU5W-SiE04ST-PlL">Paulo Kretcheu</a>.
-
-### URLs Amigáveis
-
+<p align="justify">
+Basicamente um url amigável é uma URL facilmente memorizável,não extensa e que não utiliza query string para carregar funções.
+</p>
+>Exemplo
+```
+	http://wwww.meudominio.com/blog/post
+```
 
 <p align="justify">
-Desta forma podemos construir um redirecionador de url para facilitar o tratamento das requisições por parte do servidor.
+Elas podem ser estáticas ou dinâmicas. Por dinâmicas estamos dizendo que existem variáveis que recebem parâmetros que podem alterar o que será exibido.
+</p>
+
+>Rota que lista usuários
+```
+http://www.meudominio.com/sistema/usuarios
+```
+
+>Rota para visualisar o cadastro de um usuário específico.
+```
+http://www.meudominio.com/sistema/usuario/{idDoUsuario}
+```
+
+<br/>
+<p align="justify">
+Tendo o conceito do protocolo HTTP em mente e urls amigáveis podemos construir um redirecionador de url para facilitar o tratamento das requisições por parte do servidor.
 </p>
 
 ## Visão Geral do sistema
@@ -90,23 +112,70 @@ ___
 <p align="justify">Para isso o roteador utiliza um objeto <i>RouteCollection</i> para salvar e recuperar a coleção de rotas.
 Uma vez recuperada a rota, o <i>Dispatcher</i> interpreta a ação entregando o controle para o devido <i>Controller</i> ou executando a ação.</p>
 
+```
+	app/
+	|
+	 ->src/
+		|
+		 ->Router/
+			|
+			 ->Router.php
+			|
+			 ->RouteCollection.php
+			|
+			 ->Dispatcher.php
+			|
+			 ->Route.php
+		|
+	         ->MVC/
+			|
+			 ->Controller.php
+	|
+	 ->public/
+		|
+		 ->index.php
+		|
+		 ->bootstrap.php
+		|
+		 ->.htaccess
+	|
+	 ->.htaccess						
+			   
+```
+
 ## A classe RouteCollection
 ___
 
+<p align="justify">
 Esta classe é responsável por prover meios de salvar e recuperar rotas. Dependendo da rota cadastrada retornará os parâmetros que o usuário forneceu na uri.
-
+</p>
 ### Utilitários: parseUri
 
-Remove '/' indesejável para armazenar a uri.Caso faça referência ao própio domínio retorna '/'
+<p align="justify">
+Remove '/' indesejável para armazenar a uri.Caso faça referência ao própio domínio retorna '/'. Fazemos isto para facilitar a busca através de expressôes regulares.
+</p>
+
+~~~php
+parseUri( $uri ):string
+~~~
 
 ### Utilitários: definePattern
 
 Prepara a uri para ser utilizado como expressão regular a ser buscada.
 
+~~~php
+definePattern( $pattern ):string
+~~~
+
 ### Utilitários : checkUrl
 
 <p align="justify">Este método é responsável por checar se a rota passada coincide com o padrão cadastrado. Coincidindo, o método que o solicita <b>getRoute</b> deve entender se é uma uri estática ou com parâmetros.
 Se a uri contiver parâmetros o valor de retorno é 2,se for fixa retorna 1, senão coincidir retorna 0.</p>
+
+~~~php
+checkURL( $route,$pattern ):int
+~~~
+
 <p align="justify">Para descobrir se existem parâmetros na rota primeiramente é necessário verificar a ocorrência de <i>{ }</i> com um nome válido.</p>
 <div align="center">
 <img src="/assets/rotasmvc/rgx01.jpg"><legend><i>Ocorrência de { } na uri cadastrada.</i></legend>
@@ -175,19 +244,168 @@ Se a uri contiver parâmetros o valor de retorno é 2,se for fixa retorna 1, sen
 ```
 ### Utilitários: getParams
 
-<p align="justify">Este método cria um array associativo chave-valor de acordo com os parâmetros passado pelo usuário.Este método só é chamado por <b>getRoute</b> quando ele reconhece uma uri com parâmetros.</p>
+<p align="justify">
+Este método cria um array associativo chave-valor de acordo com os parâmetros passado pelo usuário.Este método só é chamado por <b>getRoute</b> quando ele reconhece uma uri com parâmetros.
+</p>
 
+~~~php
+getParams( $route,$pattern ):array
+~~~
+
+<p align="justify">
+Para criarmos a associação de parâmetros temos que identificar as chaves na uri cadastrada($pattern) e aponta-la para o valor na uri repassada($route).
+Primeiramente precisamos apagar a parte fixa da uri repassada.
+</p>
+
+~~~php
+function getParams($route,$pattern){
+    //Variável que salva as partes fixas
+    $fixedPartsToRemove=$pattern;
+    //Removemos as partes dinâmicas
+    $fixedPartsToRemove=preg_replace('/\{[\w]+\}/','|',$fixedPartsToRemove);
+    //Tratamos a rota repassada
+    $values=$this->parseUri($route);
+    //Removemos cada parte fixa da rota colocando um separador
+    foreach(explode('|',$fixedPartsToRemove) as $part){
+		$values=str_replace($part,'|',$values);
+    }
+    //Removemos seperadores indesejáveis no começo e final
+    // depois criamos um array de valores    
+    $values=explode('|',trim($values,'|'));
+}
+~~~
+
+<p align="justify">
+Agora precisamos criar outro array com as chaves. Para isso utilizaremos a seguinte expressão regular para conseguir os nomes dentro dos { }
+</p>
+
+<div align="center">
+<img src="/assets/rotasmvc/rgx05.jpg"><legend>Busca as chaves da uri dinâmica.</legend>
+</div>
+
+~~~php
+function getParams($route,$pattern){
+    //Variável que salva as partes fixas
+    $fixedPartsToRemove=$pattern;
+    //Removemos as partes dinâmicas
+    $fixedPartsToRemove=preg_replace('/\{[\w]+\}/','|',$fixedPartsToRemove);
+    //Tratamos a rota repassada
+    $values=$this->parseUri($route);
+    //Removemos cada parte fixa da rota colocando um separador
+    foreach(explode('|',$fixedPartsToRemove) as $part){
+		$values=str_replace($part,'|',$values);
+    }
+    //Removemos seperadores indesejáveis no começo e final
+    // depois criamos um array de valores    
+    $values=explode('|',trim($values,'|'));
+    //Busca os nomes das chaves
+    preg_match_all('/(?!\{)[\w]+(?=\})/',$pattern,$matches);
+    //Combina as arrays para criar o array chave valor
+    $params=array_combine($matches[0],$values);
+    return $params; 
+}
+~~~
 
 ### addRoute
 
-Utilizado para salvar as rotas.
+<p align="justify">
+Método público utilizado para salvar as rotas.
+</p>
+
+~~~php
+addRoute( $method,$route,$action )
+~~~
+<p align="justify">
+Primeiramente utilizamos o método utilitário <b>parseUri</b> para tratar o uri que será salvo. Depois decidimos baseado no método em qual chave será salvo.
+</p>
+
+
+>Padrão de armazenamento
+~~~php
+$routes['MÉTODO']['URI'] = 'AÇÃO'
+$routes['MÉTODO']['URI-DINÂMICA' = 'exemplo/{exemplo}'] = 'AÇÃO'
+$routes['MÉTODO']['URI'] = 'namespace@controller@method'
+$routes['MÉTODO']['URI-DINÂMICA' = 'exemplo/{exemplo}'] = 'namespace@controller@method'
+~~~
+
+<p align="justify">
+O padrão da ação <b>namespace@controller@method</b> será usado para referenciar um método de um controller.
+</p>
+
+~~~php
+addRoute(string $method, string $route, $action){
+		//Tratamos a rota
+        $route = $this->parseUri($route);
+        //Decidimos em qual método salvar
+        switch ($method) {
+            case "GET":
+                $this->routes["GET"][$route] = $action;
+                break;
+            case "POST":
+                $this->routes["POST"][$route] = $action;
+                break;
+            case "PUT":
+                $this->routes["PUT"][$route] = $action;
+                break;
+            case "DELETE":
+                $this->routes["DELETE"][$route] = $action;
+                break;
+            default:
+                throw new \Exception(
+                    "ERROR 0x0001:cadastro de requisições para este método não implementada."
+                );
+        }
+    }
+~~~
 
 ### getRoute
 
-<p align="justify">Utilizado para recuperar a rota e os parâmetros fornecidos pela uri do usuário. Retorna um objeto a ser tratado pela classe <b>Router</b></p>
+<p align="justify">
+Utilizado para recuperar a rota e os parâmetros fornecidos pela uri do usuário. Retorna um objeto a ser tratado pela classe <b>Router</b>.
+</p>
 
-1. Verifica se tem rotas cadastradas para o método;
-2. Compara cada rota salva do método com a uri informada pelo usuário e decide:
-	1. Se a rota for dinâmica obtém os parâmetros fornecidos pelo usuário e retorna juntamente com o callback;
-	2. Se a rota for estática retorna apenas o callback;
-	3. Se nenhuma rota for válida retorna um _false_;
+~~~php
+getRoute( $method, $route ):object stdClass
+~~~
+
+<p align="justify">
+Para verificar se existe rota cadastrada primeiro verifica-se a existência de rotas cadastradas para o método, depois comparamos cada rota salva do método com a uri informada pelo usuário e decide-se:
+se a rota for dinâmica obtém os parâmetros fornecidos pelo usuário e retorna juntamente com o callback, se a rota for estática retorna apenas o callback, se nenhuma rota for válida retorna um _false_.
+</p>
+
+~~~php
+function getRoute($method, $route){
+        $result = new \stdClass;
+        //Se existe rota cadastrada para o método
+        if (array_key_exists($method, $this->routes)) {
+		//Para cada rota cadastrada do método
+            foreach ($this->routes[$method] as $existent_path => $callback) {
+		//escolha de acordo com o retorno da função checkUrl
+		// e monte o objeto de retorno
+                switch ($this->checkUrl($route, $existent_path)) {
+                    case 2:
+                        $result->params = $this->getParams(
+                            $route,
+                            $existent_path
+                        );
+                        $result->callback = $callback;
+                        return $result;
+                        break;
+                    case 1:
+                        $result->callback = $callback;
+                        return $result;
+                        break;
+                    case 0:
+                        continue;
+                        break;
+                    default:
+                        throw new \Exception(
+                            "ERROR 0x0002:falha na recuperação da rota."
+                        );
+                }
+            }
+        }
+        return false;
+    }
+} 
+~~~
