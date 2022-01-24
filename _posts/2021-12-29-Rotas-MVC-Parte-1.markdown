@@ -80,7 +80,7 @@ esquema ou protocolo://domínio:porta/caminho/recurso?query_string#fragmento
 * A query string é um conjunto de um ou mais pares "pergunta-resposta" ou "parâmetro-argumento" (como por exemplo nome=fulano, em que nome pode ser, por exemplo, uma variável, e fulano é o valor (argumento) atribuído a nome). É uma string enviada ao servidor para que seja possível filtrar ou mesmo criar o recurso. (opcional)
 * O fragmento é uma parte ou posição específica dentro do recurso. (opcional)
 <p align="justify">
-Basicamente um url amigável é uma URL facilmente memorizável,não extensa e que não utiliza query string para carregar funções.
+Basicamente uma url amigável é uma URL facilmente memorizável,não extensa e que não utiliza query string para carregar funções.
 </p>
 >Exemplo
 ```
@@ -110,7 +110,7 @@ Tendo o conceito do protocolo HTTP em mente e urls amigáveis podemos construir 
 ___
 <p align="justify">A função básica do Roteador é: ao receber uma requisição HTTP e direciona-la para o devido <i>Controller</i> baseado na url fornecida.</p>
 <p align="justify">Para isso o roteador utiliza um objeto <i>RouteCollection</i> para salvar e recuperar a coleção de rotas.
-Uma vez recuperada a rota, o <i>Dispatcher</i> interpreta a ação entregando o controle para o devido <i>Controller</i> ou executando a ação.</p>
+Uma vez recuperada a rota, o <i>Dispatcher</i> interpreta a ação entregando o controle para o devido <i>Controller</i> ou executando a ação. O <i>Router</i> tem a função de orquestrar as classes,sendo portanto a classe.</p>
 
 ```
 	app/
